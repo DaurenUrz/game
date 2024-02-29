@@ -20,22 +20,21 @@ pygame.display.set_caption('Space sweep')
 score = 0
 lives = 3
 bullets_left = 30
-enemy_spawn_interval = 1500
-global score_to_interval_reduction
-score_to_interval_reduction = 100
+base_enemy_spawn_interval = 1500
+enemy_spawn_interval = base_enemy_spawn_interval
 life_spawn_interval = 15000
 start_time = pygame.time.get_ticks()
 
-# Загрузка звуковых файлов
 pygame.mixer.init()
 shoot_sound = pygame.mixer.Sound("sound/shoot.wav")
 hit_sound = pygame.mixer.Sound("sound/hit.wav")
 pickup_sound = pygame.mixer.Sound("sound/pickup.wav")
 life_sound = pygame.mixer.Sound("sound/life.wav")
-collision_sound = pygame.mixer.Sound("sound/collision.wav")  # Звук столкновения врага с игроком
+collision_sound = pygame.mixer.Sound("sound/collision.wav")
 pygame.mixer.music.load("sound/bg.mp3")
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.1)
+
 def load_animation_images(directory, frames_count, new_width=None, new_height=None):
     images = []
     for i in range(1, frames_count + 1):
@@ -45,7 +44,6 @@ def load_animation_images(directory, frames_count, new_width=None, new_height=No
             image = pygame.transform.scale(image, (new_width, new_height))
         images.append(image)
     return images
-
 
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, images):
@@ -58,7 +56,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def update_animation(self):
         self.index = (self.index + 1) % len(self.images)
         self.image = self.images[self.index]
-
 
 class Player(AnimatedSprite):
     def __init__(self):
@@ -82,7 +79,6 @@ class Player(AnimatedSprite):
         angle = math.atan2(mouse_y - self.rect.centery, mouse_x - self.rect.centerx)
         self.angle = math.degrees(angle) - 90
 
-
 class Enemy(AnimatedSprite):
     def __init__(self, target, spawn_x, spawn_y):
         images = load_animation_images('enemy', 4, 50, 50)
@@ -102,10 +98,9 @@ class Enemy(AnimatedSprite):
         if not pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT).colliderect(self.rect):
             self.kill()
 
-
 class Bullet(AnimatedSprite):
     def __init__(self, x, y, angle):
-        images = load_animation_images('bullet', 2, 20, 20)  # Указываем путь к изображению пули
+        images = load_animation_images('bullet', 2, 20, 20)
         super().__init__(images)
         self.rect.center = (x, y)
         self.speed = 10
@@ -119,7 +114,6 @@ class Bullet(AnimatedSprite):
         if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH or self.rect.bottom < 0 or self.rect.top > SCREEN_HEIGHT:
             self.kill()
 
-
 class Ammo(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -129,7 +123,6 @@ class Ammo(pygame.sprite.Sprite):
         self.image = self.images[self.index]
         self.rect = self.image.get_rect(center=(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)))
         self.animation_speed = 300
-
 
 class Life(pygame.sprite.Sprite):
     def __init__(self):
@@ -141,7 +134,6 @@ class Life(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT)))
         self.animation_speed = 300
 
-
 def check_collisions(player, enemies, bullets, ammo_group, life_group):
     global score, lives, bullets_left
     for bullet in bullets:
@@ -149,11 +141,11 @@ def check_collisions(player, enemies, bullets, ammo_group, life_group):
         if hit:
             score += 1
             bullet.kill()
-            hit_sound.play()  # Воспроизведение звука попадания
+            hit_sound.play()
     hit_enemies = pygame.sprite.spritecollide(player, enemies, dokill=False)
     if hit_enemies:
         lives -= 1
-        collision_sound.play()  # Воспроизведение звука столкновения врага с игроком
+        collision_sound.play()
         for enemy in hit_enemies:
             enemy.kill()
         if lives <= 0:
@@ -161,13 +153,12 @@ def check_collisions(player, enemies, bullets, ammo_group, life_group):
     hit_ammo = pygame.sprite.spritecollide(player, ammo_group, dokill=True)
     if hit_ammo:
         bullets_left += 10
-        pickup_sound.play()  # Воспроизведение звука подбора амуниции
+        pickup_sound.play()
     hit_life = pygame.sprite.spritecollide(player, life_group, dokill=True)
     if hit_life:
         lives += 1
-        life_sound.play()  # Воспроизведение звука подбора жизни
+        life_sound.play()
     return False
-
 
 def show_game_over():
     screen.fill(BLACK)
@@ -186,9 +177,9 @@ def show_game_over():
             if event.type == pygame.KEYDOWN:
                 return False
 
-
 def game_loop():
-    global score, lives, bullets_left, enemy_spawn_interval, score_to_interval_reduction, life_spawn_interval, start_time
+    global score, lives, bullets_left, enemy_spawn_interval, life_spawn_interval, start_time
+
     score = 0
     lives = 3
     bullets_left = 30
@@ -241,7 +232,7 @@ def game_loop():
                 bullets.add(new_bullet)
                 all_sprites.add(new_bullet)
                 bullets_left -= 1
-                shoot_sound.play()  # Воспроизведение звука выстрела
+                shoot_sound.play()
             elif event.type == ADDAMMO:
                 new_ammo = Ammo()
                 ammo_group.add(new_ammo)
@@ -260,7 +251,7 @@ def game_loop():
         screen.fill(BLACK)
         for entity in all_sprites:
             if isinstance(entity, (Player, Enemy)):
-                entity.update_animation()  # Обновление анимации
+                entity.update_animation()
             screen.blit(entity.image, entity.rect)
 
         if check_collisions(player, enemies, bullets, ammo_group, life_group):
@@ -283,6 +274,5 @@ def game_loop():
         clock.tick(30)
 
     pygame.quit()
-
 
 game_loop()
