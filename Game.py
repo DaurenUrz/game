@@ -5,7 +5,7 @@ from pygame.locals import *
 
 pygame.init()
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 1000
+SCREEN_WIDTH, SCREEN_HEIGHT = 1000, 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 clock = pygame.time.Clock()
@@ -25,13 +25,12 @@ enemy_spawn_interval = base_enemy_spawn_interval
 life_spawn_interval = 15000
 start_time = pygame.time.get_ticks()
 
-# Load sound files
 pygame.mixer.init()
 shoot_sound = pygame.mixer.Sound("sound/shoot.wav")
-hit_sound = pygame.mixer.Sound("sound/hit.wav")
+hit_sound = pygame.mixer.Sound("sound/collision.mp3")
 pickup_sound = pygame.mixer.Sound("sound/pickup.wav")
 life_sound = pygame.mixer.Sound("sound/life.wav")
-collision_sound = pygame.mixer.Sound("sound/collision.wav")
+collision_sound = pygame.mixer.Sound("sound/hit.wav")
 pygame.mixer.music.load("sound/bg.mp3")
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.1)
