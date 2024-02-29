@@ -15,7 +15,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 
-pygame.display.set_caption('Dynamic Shooter Game')
+pygame.display.set_caption('Space sweep')
 
 score = 0
 lives = 3
