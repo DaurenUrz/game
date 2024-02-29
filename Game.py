@@ -33,7 +33,9 @@ hit_sound = pygame.mixer.Sound("sound/hit.wav")
 pickup_sound = pygame.mixer.Sound("sound/pickup.wav")
 life_sound = pygame.mixer.Sound("sound/life.wav")
 collision_sound = pygame.mixer.Sound("sound/collision.wav")  # Звук столкновения врага с игроком
-
+pygame.mixer.music.load("sound/bg.mp3")
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.1)
 def load_animation_images(directory, frames_count, new_width=None, new_height=None):
     images = []
     for i in range(1, frames_count + 1):
