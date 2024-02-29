@@ -5,7 +5,7 @@ from pygame.locals import *
 
 pygame.init()
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 1000
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 clock = pygame.time.Clock()
@@ -19,22 +19,19 @@ pygame.display.set_caption('Space sweep')
 
 score = 0
 lives = 3
-bullets_left = 30
+bullets_left = 10
 base_enemy_spawn_interval = 1500
 enemy_spawn_interval = base_enemy_spawn_interval
 life_spawn_interval = 15000
 start_time = pygame.time.get_ticks()
-interval_update_time = 0
-interval_update_interval = 5000
-interval_reduction_rate = 0.5
 
-# Загрузка звуковых файлов
+# Load sound files
 pygame.mixer.init()
 shoot_sound = pygame.mixer.Sound("sound/shoot.wav")
 hit_sound = pygame.mixer.Sound("sound/hit.wav")
 pickup_sound = pygame.mixer.Sound("sound/pickup.wav")
 life_sound = pygame.mixer.Sound("sound/life.wav")
-collision_sound = pygame.mixer.Sound("sound/collision.wav")  # Звук столкновения врага с игроком
+collision_sound = pygame.mixer.Sound("sound/collision.wav")
 pygame.mixer.music.load("sound/bg.mp3")
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.1)
@@ -104,7 +101,7 @@ class Enemy(AnimatedSprite):
 
 class Bullet(AnimatedSprite):
     def __init__(self, x, y, angle):
-        images = load_animation_images('bullet', 2, 20, 20)  # Указываем путь к изображению пули
+        images = load_animation_images('bullet', 2, 20, 20)
         super().__init__(images)
         self.rect.center = (x, y)
         self.speed = 10
@@ -145,23 +142,23 @@ def check_collisions(player, enemies, bullets, ammo_group, life_group):
         if hit:
             score += 1
             bullet.kill()
-            hit_sound.play()  # Воспроизведение звука попадания
+            hit_sound.play()
     hit_enemies = pygame.sprite.spritecollide(player, enemies, dokill=False)
     if hit_enemies:
         lives -= 1
-        collision_sound.play()  # Воспроизведение звука столкновения врага с игроком
+        collision_sound.play()
         for enemy in hit_enemies:
             enemy.kill()
         if lives <= 0:
             return True
     hit_ammo = pygame.sprite.spritecollide(player, ammo_group, dokill=True)
     if hit_ammo:
-        bullets_left += 10
-        pickup_sound.play()  # Воспроизведение звука подбора амуниции
+        bullets_left += 5
+        pickup_sound.play()
     hit_life = pygame.sprite.spritecollide(player, life_group, dokill=True)
     if hit_life:
         lives += 1
-        life_sound.play()  # Воспроизведение звука подбора жизни
+        life_sound.play()
     return False
 
 def show_game_over():
@@ -182,7 +179,7 @@ def show_game_over():
                 return False
 
 def game_loop():
-    global score, lives, bullets_left, enemy_spawn_interval, life_spawn_interval, start_time, interval_update_time
+    global score, lives, bullets_left, enemy_spawn_interval, start_time
 
     score = 0
     lives = 3
@@ -209,11 +206,8 @@ def game_loop():
         current_time = pygame.time.get_ticks()
         elapsed_time = (current_time - start_time) / 1000
 
-        if current_time - interval_update_time >= interval_update_interval:
-            interval_update_time = current_time
-            enemy_spawn_interval -= interval_reduction_rate * 1000
-
-        enemy_spawn_interval = max(1000, enemy_spawn_interval)
+        # Update enemy spawn interval every frame
+        enemy_spawn_interval = max(1000, base_enemy_spawn_interval - 200 * (elapsed_time // 5))
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -240,7 +234,7 @@ def game_loop():
                 bullets.add(new_bullet)
                 all_sprites.add(new_bullet)
                 bullets_left -= 1
-                shoot_sound.play()  # Воспроизведение звука выстрела
+                shoot_sound.play()
             elif event.type == ADDAMMO:
                 new_ammo = Ammo()
                 ammo_group.add(new_ammo)
@@ -259,7 +253,7 @@ def game_loop():
         screen.fill(BLACK)
         for entity in all_sprites:
             if isinstance(entity, (Player, Enemy)):
-                entity.update_animation()  # Обновление анимации
+                entity.update_animation()
             screen.blit(entity.image, entity.rect)
 
         if check_collisions(player, enemies, bullets, ammo_group, life_group):
